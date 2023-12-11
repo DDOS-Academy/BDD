@@ -7,8 +7,11 @@ CREATE TABLE Message(
    idMessage INT,
    dateMessage DATE NOT NULL,
    contenu VARCHAR(50) NOT NULL,
-   loginReceveur VARCHAR(20) NOT NULL,
-   PRIMARY KEY(idMessage)
+   loginUser VARCHAR(20) NOT NULL,
+   loginUser_1 VARCHAR(20) NOT NULL,
+   PRIMARY KEY(idMessage),
+   FOREIGN KEY(loginUser) REFERENCES Utilisateur(loginUser),
+   FOREIGN KEY(loginUser_1) REFERENCES Utilisateur(loginUser)
 );
 
 CREATE TABLE Être_ami(
@@ -28,21 +31,3 @@ CREATE TABLE Repondre(
    FOREIGN KEY(loginUser) REFERENCES Utilisateur(loginUser),
    FOREIGN KEY(idMessage) REFERENCES Message(idMessage)
 );
-
-CREATE TABLE Recevoir(
-   loginUser VARCHAR(20),
-   idMessage INT,
-   PRIMARY KEY(loginUser, idMessage),
-   FOREIGN KEY(loginUser) REFERENCES Utilisateur(loginUser),
-   FOREIGN KEY(idMessage) REFERENCES Message(idMessage)
-);
-
-CREATE TABLE Ecrire(
-   loginUser VARCHAR(20),
-   idMessage INT,
-   PRIMARY KEY(loginUser, idMessage),
-   FOREIGN KEY(loginUser) REFERENCES Utilisateur(loginUser),
-   FOREIGN KEY(idMessage) REFERENCES Message(idMessage)
-);
-
-Commit;
