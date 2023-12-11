@@ -14,7 +14,7 @@ CREATE TABLE Message(
    FOREIGN KEY(loginUser_1) REFERENCES Utilisateur(loginUser)
 );
 
-CREATE TABLE Être_ami(
+CREATE TABLE Etre_ami(
    loginUser VARCHAR(20),
    loginUser_1 VARCHAR(20),
    PRIMARY KEY(loginUser, loginUser_1),
@@ -31,3 +31,5 @@ CREATE TABLE Repondre(
    FOREIGN KEY(loginUser) REFERENCES Utilisateur(loginUser),
    FOREIGN KEY(idMessage) REFERENCES Message(idMessage)
 );
+
+COMMIT;
