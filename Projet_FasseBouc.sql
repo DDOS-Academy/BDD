@@ -35,22 +35,8 @@ CREATE TABLE Repondre(
 COMMIT;
 
 
-
-CREATE PROCEDURE ajouterUtilisateur (idUtilisateur IN VARCHAR)
-IS
-loginUtilisateur VARCHAR(20);
-BEGIN
-IF idUtilisateur IS NULL THEN
-  dbms_output.put_line('Erreur login utilisateur');
-ELSE
-INSERT INTO utilisateur values (idUtilisateur);
-dbms_output.put_line('Nouvel utilisateur : ');
-dbms_output.put_line(loginUtilisateur);
-END IF;
-END ajouterUtilisateur;
-
 select * from utilisateur;
 
 SET SERVEROUTPUT ON;
 
-EXECUTE ajouterUtilisateur('Arthur');
+EXECUTE ajouterUtilisateur('gabin');
