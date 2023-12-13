@@ -5,6 +5,7 @@ PACKAGE PACKFASSEBOUC IS
 PROCEDURE ajouterUtilisateur(idUtilisateur IN VARCHAR);
 PROCEDURE connexion(idUtilisateur IN VARCHAR);
 PROCEDURE deconnexion;
+PROCEDURE supprimerUtilisateur;
 
 -- Varaible publique
 utilisateurConnecte varchar(20);

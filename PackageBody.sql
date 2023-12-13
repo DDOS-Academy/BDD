@@ -47,6 +47,16 @@ PACKAGE BODY PACKFASSEBOUC IS
         utilisateurConnecte := '';
       END IF;
   END deconnexion;
-
+  
+  PROCEDURE supprimerUtilisateur
+    IS
+    BEGIN
+      IF utilisateurConnecte IS NULL THEN
+        dbms_output.put_line('Aucun utilisateur de connecté');
+      ELSE
+        dbms_output.put_line('Utilisateur : ' || utilisateurConnecte || 'supprimé');
+        EXECUTE IMMEDIATE 'DELETE FROM utilisateur WHERE loginUser = ''' ||utilisateurConnecte||''')';
+      END IF;
+  END supprimerUtilisateur;
 
 END PACKFASSEBOUC;
