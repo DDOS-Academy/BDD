@@ -33,11 +33,20 @@ PACKAGE BODY PACKFASSEBOUC IS
           END IF;
         ELSE
           dbms_output.put_line('Utilisateur ' || utilisateurConnecte || ' déjà connecté');
-        END IF;
-        
+        END IF;       
       END IF;
   END connexion;
   
+  PROCEDURE deconnexion 
+    IS
+    BEGIN
+      IF utilisateurConnecte IS NULL THEN
+        dbms_output.put_line('Aucun utilisateur de connecté');
+      ELSE
+        dbms_output.put_line('Utilisateur : ' || utilisateurConnecte || ' déconnecté');
+        utilisateurConnecte := '';
+      END IF;
+  END deconnexion;
 
 
 END PACKFASSEBOUC;
