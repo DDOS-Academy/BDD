@@ -18,13 +18,19 @@ PACKAGE BODY PACKFASSEBOUC IS
   
   PROCEDURE connexion (idUtilisateur IN VARCHAR)
     IS
+      nbUser NUMBER(1);
     BEGIN
       IF idUtilisateur IS NULL THEN
         dbms_output.put_line('Erreur login utilisateur');
       ELSE
         IF utilisateurConnecte IS NULL THEN
-          utilisateurConnecte := idUtilisateur;
-          dbms_output.put_line('Utilisateur connecté : ' || idUtilisateur);
+          SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idUtilisateur;
+          IF nbUser <> 0 THEN
+            utilisateurConnecte := idUtilisateur;
+            dbms_output.put_line('Utilisateur connecté : ' || utilisateurConnecte);
+          ELSE
+          dbms_output.put_line('L"utilisateur "' || idUtilisateur || '" n"existe pas' );
+          END IF;
         ELSE
           dbms_output.put_line('Utilisateur ' || utilisateurConnecte || ' déjà connecté');
         END IF;
