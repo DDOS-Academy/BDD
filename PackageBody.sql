@@ -16,6 +16,21 @@ PACKAGE BODY PACKFASSEBOUC IS
         dbms_output.put_line('Utilisateur déjà existant');
   END ajouterUtilisateur;
   
+  PROCEDURE connexion (idUtilisateur IN VARCHAR)
+    IS
+    BEGIN
+      IF idUtilisateur IS NULL THEN
+        dbms_output.put_line('Erreur login utilisateur');
+      ELSE
+        IF utilisateurConnecte IS NULL THEN
+          utilisateurConnecte := idUtilisateur;
+          dbms_output.put_line('Utilisateur connecté : ' || idUtilisateur);
+        ELSE
+          dbms_output.put_line('Utilisateur ' || utilisateurConnecte || ' déjà connecté');
+        END IF;
+        
+      END IF;
+  END connexion;
   
 
 
