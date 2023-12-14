@@ -44,7 +44,7 @@ PACKAGE BODY PACKFASSEBOUC IS
         dbms_output.put_line('Aucun utilisateur de connecté');
       ELSE
         dbms_output.put_line('Utilisateur : ' || utilisateurConnecte || ' déconnecté');
-        utilisateurConnecte := '';
+        utilisateurConnecte := NULL;
       END IF;
   END deconnexion;
   
@@ -53,13 +53,14 @@ PACKAGE BODY PACKFASSEBOUC IS
     BEGIN
       IF utilisateurConnecte IS NULL THEN
         dbms_output.put_line('Aucun utilisateur de connecté');
-      ELSE
-        dbms_output.put_line('Utilisateur : ' || utilisateurConnecte || 'supprimé');
-        EXECUTE IMMEDIATE 'DELETE FROM utilisateur WHERE loginUser = ''' ||utilisateurConnecte||''')';
+      ELSE      
+        EXECUTE IMMEDIATE 'DELETE FROM utilisateur WHERE loginUser='''||utilisateurConnecte||'''';
+        dbms_output.put_line('Utilisateur : ' ||utilisateurConnecte|| ' supprimé');
+        utilisateurConnecte := NULL;
       END IF;
   END supprimerUtilisateur;
 
-PROCEDURE ajouterAmi(idAmi IN VARCHAR)
+  PROCEDURE ajouterAmi(idAmi IN VARCHAR)
     IS
     nbUser NUMBER(1);
     BEGIN 
@@ -76,8 +77,8 @@ PROCEDURE ajouterAmi(idAmi IN VARCHAR)
           END IF;
          END IF;
         END IF;
-    END ajouterAmi;  
-
+    END ajouterAmi; 
+    
     PROCEDURE supprimerAmi(idAmi IN VARCHAR)
       IS
       nbUser NUMBER(1);
