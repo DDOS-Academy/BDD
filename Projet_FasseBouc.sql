@@ -40,3 +40,6 @@ select * from utilisateur;
 SET SERVEROUTPUT ON;
 
 EXECUTE ajouterUtilisateur('gabin');
+EXECUTE PACKFASSEBOUC.connexion('gabin');
+EXECUTE PACKFASSEBOUC.deconnexion;
+EXECUTE PACKFASSEBOUC.supprimerutilisateur;
