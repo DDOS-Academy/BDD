@@ -87,8 +87,8 @@ END deleteAllMessages;
       IF utilisateurConnecte IS NULL THEN
         dbms_output.put_line('Aucun utilisateur de connecté');
       ELSE
-        IF idAmi IS NULL THEN
-          dbms_output.put_line('Veuillez entrer un nom d utilisateur');
+        IF idAmi IS NULL  OR idAmi = utilisateurConnecte THEN
+          dbms_output.put_line('Veuillez entrer un nom d utilisateur correct');
         ELSE 
           SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idAmi;
           IF nbUser <> 0 THEN
@@ -107,7 +107,7 @@ END deleteAllMessages;
           dbms_output.put_line('Aucun utilisateur de connecté');
         ELSE
           IF idAmi IS NULL THEN
-            dbms_output.put_line('Veuillez entrer un nom d utilisateur');
+            dbms_output.put_line('Veuillez entrer un nom d utilisateur correct');
           ELSE
           SELECT COUNT(idAmi) INTO nbUser FROM etre_ami WHERE loginUser = utilisateurConnecte AND loginUser_1 = idAmi;
             IF nbUser <> 0 THEN
