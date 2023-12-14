@@ -135,6 +135,12 @@ END deleteAllMessages;
                 dbms_output.put_line('Aucun message reçu par '||idUtilisateur||'');
               END IF;
       END afficherMur;
+
+      PROCEDURE ajouterMessageMur(idAmi IN VARCHAR, message IN VARCHAR)
+        IS
+        BEGIN
+        idMessageSequence := message_id.nextval;
+      END ajouterMessageMur;
       
       
 

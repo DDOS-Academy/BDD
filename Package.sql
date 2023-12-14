@@ -14,4 +14,6 @@ PROCEDURE afficherMur(idUtilisateur IN VARCHAR);
 utilisateurConnecte varchar(20);
 
 
+
+
 END PACKFASSEBOUC;
