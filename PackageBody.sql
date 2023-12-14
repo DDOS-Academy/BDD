@@ -78,4 +78,23 @@ PROCEDURE ajouterAmi(idAmi IN VARCHAR)
         END IF;
     END ajouterAmi;  
 
+    PROCEDURE supprimerAmi(idAmi IN VARCHAR)
+      IS
+      nbUser NUMBER(1);
+      BEGIN
+        IF utilisateurConnecte IS NULL THEN
+          dbms_output.put_line('Aucun utilisateur de connecté');
+        ELSE
+          IF idAmi IS NULL THEN
+            dbms_output.put_line('Veuillez entrer un nom d utilisateur');
+          ELSE
+          SELECT COUNT(idAmi) INTO nbUser FROM etre_ami WHERE loginUser = utilisateurConnecte AND loginUser_1 = idAmi;
+            IF nbUser <> 0 THEN
+              EXECUTE IMMEDIATE  'DELETE FROM etre_ami WHERE loginUser='''||utilisateurConnecte||''' AND loginUser_1='''||idAmi||'''';
+              dbms_output.put_line('Vous êtes désormais !ami avec '||idAmi|| ' !');
+            END IF;
+          END IF;
+        END IF;
+      END supprimerAmi;
+
 END PACKFASSEBOUC;
