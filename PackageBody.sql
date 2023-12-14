@@ -59,4 +59,23 @@ PACKAGE BODY PACKFASSEBOUC IS
       END IF;
   END supprimerUtilisateur;
 
+PROCEDURE ajouterAmi(idAmi IN VARCHAR)
+    IS
+    nbUser NUMBER(1);
+    BEGIN 
+      IF utilisateurConnecte IS NULL THEN
+        dbms_output.put_line('Aucun utilisateur de connecté');
+      ELSE
+        IF idAmi IS NULL THEN
+          dbms_output.put_line('Veuillez entrer un nom d utilisateur');
+        ELSE 
+          SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idAmi;
+          IF nbUser <> 0 THEN
+            EXECUTE IMMEDIATE  'INSERT INTO etre_ami values ('''||utilisateurConnecte||''','''||idAmi||''')';
+            dbms_output.put_line('Vous êtes désormais ami avec '||idAmi|| ' !');
+          END IF;
+         END IF;
+        END IF;
+    END ajouterAmi;  
+
 END PACKFASSEBOUC;
