@@ -1,4 +1,4 @@
-CREATE OR REPLACE 
+create or replace 
 PACKAGE PACKFASSEBOUC IS
 
 -- PROCEDURE publique
@@ -14,4 +14,3 @@ utilisateurConnecte varchar(20);
 
 
 END PACKFASSEBOUC;
-

@@ -1,7 +1,25 @@
 create or replace 
 PACKAGE BODY PACKFASSEBOUC IS
+ 
+/* Procédures privées */
+PROCEDURE deleteAllFriends
+  IS
+  BEGIN
+    EXECUTE IMMEDIATE 'DELETE FROM etre_ami WHERE loginUser='''||utilisateurConnecte||''' OR loginUser_1='''||utilisateurConnecte||'''';
+    dbms_output.put_line('Tout les amis de : '||utilisateurConnecte||' sont supprimés');
+END deleteAllFriends;
+      
+PROCEDURE deleteAllMessages
+  IS
+  BEGIN
+    EXECUTE IMMEDIATE 'DELETE FROM message WHERE loginUser='''||utilisateurConnecte||''' OR loginUser_1='''||utilisateurConnecte||'''';
+    EXECUTE IMMEDIATE 'DELETE FROM repondre WHERE loginUser='''||utilisateurConnecte||'''';
+    dbms_output.put_line('Tout les messages à destination et provenant de : '||utilisateurConnecte||' ont été supprimés');
+END deleteAllMessages;
 
 
+
+/* Procédures publiques */
   PROCEDURE ajouterUtilisateur (idUtilisateur IN VARCHAR)
     IS
     BEGIN
@@ -53,10 +71,12 @@ PACKAGE BODY PACKFASSEBOUC IS
     BEGIN
       IF utilisateurConnecte IS NULL THEN
         dbms_output.put_line('Aucun utilisateur de connecté');
-      ELSE      
+      ELSE
+        deleteAllFriends;
+        deleteAllMessages;
         EXECUTE IMMEDIATE 'DELETE FROM utilisateur WHERE loginUser='''||utilisateurConnecte||'''';
         dbms_output.put_line('Utilisateur : ' ||utilisateurConnecte|| ' supprimé');
-        utilisateurConnecte := NULL;
+        deconnexion;
       END IF;
   END supprimerUtilisateur;
 
@@ -92,10 +112,12 @@ PACKAGE BODY PACKFASSEBOUC IS
           SELECT COUNT(idAmi) INTO nbUser FROM etre_ami WHERE loginUser = utilisateurConnecte AND loginUser_1 = idAmi;
             IF nbUser <> 0 THEN
               EXECUTE IMMEDIATE  'DELETE FROM etre_ami WHERE loginUser='''||utilisateurConnecte||''' AND loginUser_1='''||idAmi||'''';
-              dbms_output.put_line('Vous êtes désormais !ami avec '||idAmi|| ' !');
+              dbms_output.put_line('Vous n''êtes désormais plus ami avec '||idAmi|| ' !');
             END IF;
           END IF;
         END IF;
       END supprimerAmi;
+      
+      
 
 END PACKFASSEBOUC;
