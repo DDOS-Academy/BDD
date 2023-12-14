@@ -118,6 +118,22 @@ END deleteAllMessages;
         END IF;
       END supprimerAmi;
       
+      PROCEDURE afficherMur(idUtilisateur IN VARCHAR)
+        IS
+        nbUser NUMBER(1);
+        nbMessage NUMBER(1);
+        BEGIN
+          IF idUtilisateur IS NULL THEN
+            dbms_output.put_line('Veuillez entrer un nom d utilisateur correct');
+          END IF;
+            SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idUtilisateur;
+            SELECT COUNT(idMessage) INTO nbMessage FROM message WHERE loginUser_1 = idUtilisateur;
+              IF nbUser <> 0 AND nbMessage <> 0 THEN
+                EXECUTE IMMEDIATE 'SELECT * FROM message WHERE loginUser_1='''||idUtilisateur||''' ORDER BY dateMessage';
+              ELSE 
+                dbms_output.put_line('Aucun message reçu par '||idUtilisateur||'');
+              END IF;
+      END afficherMur;
       
 
 END PACKFASSEBOUC;

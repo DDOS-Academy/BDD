@@ -8,6 +8,7 @@ PROCEDURE deconnexion;
 PROCEDURE supprimerUtilisateur;
 PROCEDURE ajouterAmi(idAmi IN VARCHAR);
 PROCEDURE supprimerAmi(idAmi IN VARCHAR);
+PROCEDURE afficherMur(idUtilisateur IN VARCHAR);
 
 -- Varaible publique
 utilisateurConnecte varchar(20);
