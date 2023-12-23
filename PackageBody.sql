@@ -137,14 +137,6 @@ END deleteAllMessages;
       END afficherMur;
 
 
-      PROCEDURE ajouterMessageMur(idAmi IN VARCHAR, message IN VARCHAR)
-        IS
-        BEGIN
-        idMessageSequence := message_id.nextval;
-      END ajouterMessageMur;
-
-
-
        PROCEDURE ajouterMessageMur(idAmi IN VARCHAR, message IN VARCHAR)
         IS
         v_idMessage INT;
@@ -157,7 +149,7 @@ END deleteAllMessages;
           SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idAmi;
           IF nbUser <> 0 THEN
             INSERT INTO Message(idMessage, dateMessage, contenu, loginUser, loginUser_1)
-            VALUES (v_idMessage, SYSDATE, 'Contenu du message', utilisateur_connecte, idAmi);
+            VALUES (v_idMessage, SYSDATE, message, utilisateur_connecte, idAmi);
             DBMS_OUTPUT.PUT_LINE('Le message a été ajouté avec succès.');
           ELSE 
             dbms_output.put_line('Veuillez entrer un nom d utilisateur correct');
@@ -216,10 +208,35 @@ END deleteAllMessages;
         END IF;
       END afficherAmi;
 
+      PROCEDURE repondreMessageMur (idMessage1 IN NUMBER, messageReponse IN VARCHAR)
+      IS
+      a_idMessage INT;
+      nbMessage NUMBER(1);
+      IdUser VARCHAR(20);
+      nbUser NUMBER(1);
+      BEGIN
+      IF idUtilisateur IS NULL THEN
+        dbms_output.put_line('Entrez un utilisateur');
+      END IF;
 
+      SELECT COUNT(idMessage) INTO nbMessage FROM message WHERE idMessage = idMessage1;
+      SELECT loginUser INTO IdUser FROM message WHERE idMessage = idMessage1;
+        IF nbMessage <> 0 THEN
+          IF message IS NULL THEN 
+            dbms_output.put_line('Veuillez remplir tout les champs')
+          END IF;
+            INSERT INTO repondre(loginUser, idMessage, messageReponse, dateMessage)
+            VALUES (IdUser, idMessage1, messageReponse, SYSDATE);
+            DBMS_OUTPUT.PUT_LINE('Le message a été ajouté avec succès.');
+        END IF;
+      END repondreMessageMur;
 
-
-
-
+      PROCEDURE chercherMembre(IN prefixeUtilisateur IN VARCHAR)
+        BEGIN
+          IF prefixeUtilisateur IS NULL THEN
+            DBMS_OUTPUT.PUT_LINE('Veuillez utiliser un préfixe pris en charge');
+          END IF;
+          SELECT loginUser FROM Utilisateur WHERE loginUser LIKE CONCAT(prefixeUtilisateur, '%');
+      END chercherMembre 
 
 END PACKFASSEBOUC;
