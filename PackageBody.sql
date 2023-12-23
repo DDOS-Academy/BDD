@@ -136,7 +136,16 @@ END deleteAllMessages;
               END IF;
       END afficherMur;
 
+
       PROCEDURE ajouterMessageMur(idAmi IN VARCHAR, message IN VARCHAR)
+        IS
+        BEGIN
+        idMessageSequence := message_id.nextval;
+      END ajouterMessageMur;
+
+
+
+       PROCEDURE ajouterMessageMur(idAmi IN VARCHAR, message IN VARCHAR)
         IS
         v_idMessage INT;
         nbUser NUMBER(1);
@@ -153,26 +162,28 @@ END deleteAllMessages;
           ELSE 
             dbms_output.put_line('Veuillez entrer un nom d utilisateur correct');
           END IF;
+        idMessageSequence := message_id.nextval;
       END ajouterMessageMur;
+
 
       PROCEDURE supprimerMessageMur(message_id IN VARCHAR)
       IS
         nbMessage NUMBER := 0;
       BEGIN
-        SELECT COUNT(message) INTO nbMessage FROM Mur WHERE message = message_id;
-
-        IF nbMessage <> 0 THEN
-          EXECUTE IMMEDIATE 'DELETE FROM Mur WHERE message = :id' USING message_id;
-          dbms_output.put_line('Votre message a été supprimé du mur.');
-        ELSE
-          dbms_output.put_line('Aucun message correspondant trouvé dans le mur.');
+        IF idUtilisateur IS NULL THEN -- Personne n'est connecté
+          dbms_output.put_line('Veuillez vous connecter');
         END IF;
+        SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idUtilisateur; -- Vérification que l'utilisateur existe
+        SELECT COUNT(message_id) INTO nbMessage FROM message WHERE loginUser = idUtilisateur; -- Vérification que le mur contient des messages
+        SELECT COUNT(message) INTO nbMessage FROM Mur WHERE message = message_id;
+          IF nbMessage <> 0 THEN
+            EXECUTE IMMEDIATE 'DELETE FROM Mur WHERE message = :id' USING message_id '''AND loginUser='''||idUtilisateur||'''';
+            dbms_output.put_line('Votre message a été supprimé du mur.');
+          ELSE
+            dbms_output.put_line('Aucun message correspondant trouvé dans le mur.');
+          END IF;
       END supprimerMessageMur;
 
 
 
-      
-
-
-    
 END PACKFASSEBOUC;
