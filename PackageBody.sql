@@ -138,8 +138,21 @@ END deleteAllMessages;
 
       PROCEDURE ajouterMessageMur(idAmi IN VARCHAR, message IN VARCHAR)
         IS
+        v_idMessage INT;
+        nbUser NUMBER(1);
         BEGIN
-        idMessageSequence := message_id.nextval;
+        SELECT seq_message_id.NEXTVAL INTO v_idMessage FROM DUAL;
+          IF idAmi IS NULL OR message IS NULL THEN 
+            dbms_output.put_line('Veuillez remplir tout les champs')
+          END IF;
+          SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idAmi;
+          IF nbUser <> 0 THEN
+            INSERT INTO Message(idMessage, dateMessage, contenu, loginUser, loginUser_1)
+            VALUES (v_idMessage, SYSDATE, 'Contenu du message', utilisateur_connecte, idAmi);
+            DBMS_OUTPUT.PUT_LINE('Le message a été ajouté avec succès.');
+          ELSE 
+            dbms_output.put_line('Veuillez entrer un nom d utilisateur correct');
+          END IF;
       END ajouterMessageMur;
 
       PROCEDURE supprimerMessageMur(message_id IN VARCHAR)
