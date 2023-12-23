@@ -184,25 +184,42 @@ END deleteAllMessages;
           END IF;
       END supprimerMessageMur;
 
-    PROCEDURE afficherAmi(idUtilisateur IN VARCHAR)
-    IS
-    nbUser NUMBER(1);
-    BEGIN
-    IF idUtilisateur IS NULL THEN
-      dbms_output.put_line('Entrez un utilisateur');
-    END IF;
+      PROCEDURE afficherAmi(idUtilisateur IN VARCHAR)
+      IS
+      nbUser NUMBER(1);
+      BEGIN
+      IF idUtilisateur IS NULL THEN
+        dbms_output.put_line('Entrez un utilisateur');
+      END IF;
 
-      SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idAmi;
-    IF nbUser <> 0 THEN
-      EXECUTE IMMEDIATE 'SELECT * FROM etre_ami WHERE loginUser = '''||idUtilisateur||''' OR loginUser_1 = '''||idUtilisateur||'''';
-    ELSE  
-      dbms_output.put_line('Veuillez entrer un utilisateur valide');
-    END IF;
-    END afficherAmi;
+        SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idAmi;
+      IF nbUser <> 0 THEN
+        EXECUTE IMMEDIATE 'SELECT * FROM etre_ami WHERE loginUser = '''||idUtilisateur||''' OR loginUser_1 = '''||idUtilisateur||'''';
+      ELSE  
+        dbms_output.put_line('Veuillez entrer un utilisateur valide');
+      END IF;
+      END afficherAmi;
+
+      PROCEDURE compterAmi(idUtilisateur IN VARCHAR)
+      IS
+      nbUser NUMBER(1);
+      BEGIN
+      IF idUtilisateur IS NULL THEN
+        dbms_output.put_line('Entrez un utilisateur');
+      END IF;
+        SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idUtilisateur;
+        IF nbUser <> 0 THEN
+          SELECT COUNT (loginUser) INTO nbUser FROM etre_ami WHERE loginUser = idUtilisateur OR loginUser_1 = idUtilisateur;
+          dbms_output.put_line('Vous avez '||nbUser||' ami(s)');
+        ELSE  
+          dbms_output.put_line('Veuillez entrer un utilisateur valide');
+        END IF;
+      END afficherAmi;
 
 
-      
 
 
-    
+
+
+
 END PACKFASSEBOUC;
