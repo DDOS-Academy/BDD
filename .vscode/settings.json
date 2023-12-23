@@ -1,0 +1,4 @@
+{
+    "cmake.options.statusBarVisibility": "visible",
+    "oracledevtools.defaultConnection": "GABIN.XEPDB1"
+}

@@ -141,7 +141,25 @@ END deleteAllMessages;
         BEGIN
         idMessageSequence := message_id.nextval;
       END ajouterMessageMur;
-      
+
+      PROCEDURE supprimerMessageMur(message_id IN VARCHAR)
+      IS
+        nbMessage NUMBER := 0;
+      BEGIN
+        SELECT COUNT(message) INTO nbMessage FROM Mur WHERE message = message_id;
+
+        IF nbMessage <> 0 THEN
+          EXECUTE IMMEDIATE 'DELETE FROM Mur WHERE message = :id' USING message_id;
+          dbms_output.put_line('Votre message a été supprimé du mur.');
+        ELSE
+          dbms_output.put_line('Aucun message correspondant trouvé dans le mur.');
+        END IF;
+      END supprimerMessageMur;
+
+
+
       
 
+
+    
 END PACKFASSEBOUC;
