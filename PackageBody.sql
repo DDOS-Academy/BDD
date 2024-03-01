@@ -144,32 +144,32 @@ END deleteAllMessages;
         BEGIN
         SELECT seq_message_id.NEXTVAL INTO v_idMessage FROM DUAL;
           IF idAmi IS NULL OR message IS NULL THEN 
-            dbms_output.put_line('Veuillez remplir tout les champs')
+            dbms_output.put_line('Veuillez remplir tout les champs');
           END IF;
           SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idAmi;
           IF nbUser <> 0 THEN
-            INSERT INTO Message(idMessage, dateMessage, contenu, loginUser, loginUser_1)
-            VALUES (v_idMessage, SYSDATE, message, utilisateur_connecte, idAmi);
+            EXECUTE IMMEDIATE 'INSERT INTO Message VALUES('''||v_idMessage||''', '''||SYSDATE||''', '''||message||''', '''||utilisateurConnecte||''', '''||idAmi||''')';
             DBMS_OUTPUT.PUT_LINE('Le message a été ajouté avec succès.');
           ELSE 
             dbms_output.put_line('Veuillez entrer un nom d utilisateur correct');
           END IF;
-        idMessageSequence := message_id.nextval;
+        v_idMessage := message_id.nextval;
       END ajouterMessageMur;
 
 
       PROCEDURE supprimerMessageMur(message_id IN VARCHAR)
       IS
         nbMessage NUMBER := 0;
+        nbUser NUMBER := 0;
       BEGIN
-        IF idUtilisateur IS NULL THEN -- Personne n'est connecté
+        IF utilisateurConnecte IS NULL THEN -- Personne n'est connecté
           dbms_output.put_line('Veuillez vous connecter');
         END IF;
-        SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idUtilisateur; -- Vérification que l'utilisateur existe
-        SELECT COUNT(message_id) INTO nbMessage FROM message WHERE loginUser = idUtilisateur; -- Vérification que le mur contient des messages
-        SELECT COUNT(message) INTO nbMessage FROM Mur WHERE message = message_id;
+        SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = utilisateurConnecte; -- Vérification que l'utilisateur existe
+        SELECT COUNT(message_id) INTO nbMessage FROM message WHERE loginUser = utilisateurConnecte; -- Vérification que le mur contient des messages
+        SELECT COUNT(contenu) INTO nbMessage FROM message WHERE idmessage = message_id;
           IF nbMessage <> 0 THEN
-            EXECUTE IMMEDIATE 'DELETE FROM Mur WHERE message = :id' USING message_id '''AND loginUser='''||idUtilisateur||'''';
+            EXECUTE IMMEDIATE 'DELETE FROM Mur WHERE idmessage = message_id AND loginUser='||utilisateurConnecte||'';
             dbms_output.put_line('Votre message a été supprimé du mur.');
           ELSE
             dbms_output.put_line('Aucun message correspondant trouvé dans le mur.');
@@ -184,7 +184,7 @@ END deleteAllMessages;
         dbms_output.put_line('Entrez un utilisateur');
       END IF;
 
-        SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idAmi;
+        SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idUtilisateur;
       IF nbUser <> 0 THEN
         EXECUTE IMMEDIATE 'SELECT * FROM etre_ami WHERE loginUser = '''||idUtilisateur||''' OR loginUser_1 = '''||idUtilisateur||'''';
       ELSE  
@@ -206,9 +206,9 @@ END deleteAllMessages;
         ELSE  
           dbms_output.put_line('Veuillez entrer un utilisateur valide');
         END IF;
-      END afficherAmi;
+      END compterAmi;
 
-      PROCEDURE repondreMessageMur (idMessage1 IN NUMBER, messageReponse IN VARCHAR)
+      PROCEDURE repondreMessageMur (idMessage1 IN NUMBER, messageReponse IN VARCHAR, idUtilisateur IN VARCHAR)
       IS
       a_idMessage INT;
       nbMessage NUMBER(1);
@@ -222,8 +222,8 @@ END deleteAllMessages;
       SELECT COUNT(idMessage) INTO nbMessage FROM message WHERE idMessage = idMessage1;
       SELECT loginUser INTO IdUser FROM message WHERE idMessage = idMessage1;
         IF nbMessage <> 0 THEN
-          IF message IS NULL THEN 
-            dbms_output.put_line('Veuillez remplir tout les champs')
+          IF messageReponse IS NULL THEN 
+            dbms_output.put_line('Veuillez remplir tout les champs');
           END IF;
             INSERT INTO repondre(loginUser, idMessage, messageReponse, dateMessage)
             VALUES (IdUser, idMessage1, messageReponse, SYSDATE);
@@ -231,12 +231,12 @@ END deleteAllMessages;
         END IF;
       END repondreMessageMur;
 
-      PROCEDURE chercherMembre(IN prefixeUtilisateur IN VARCHAR)
-        BEGIN
+     /* PROCEDURE chercherMembre(prefixeUtilisateur IN VARCHAR)
+      BEGIN
           IF prefixeUtilisateur IS NULL THEN
             DBMS_OUTPUT.PUT_LINE('Veuillez utiliser un préfixe pris en charge');
           END IF;
           SELECT loginUser FROM Utilisateur WHERE loginUser LIKE CONCAT(prefixeUtilisateur, '%');
-      END chercherMembre 
+      END chercherMembre; */
 
 END PACKFASSEBOUC;
