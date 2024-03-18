@@ -231,12 +231,13 @@ END deleteAllMessages;
         END IF;
       END repondreMessageMur;
 
-     /* PROCEDURE chercherMembre(prefixeUtilisateur IN VARCHAR)
+     PROCEDURE chercherMembre(prefixeUtilisateur IN VARCHAR)
+     IS
       BEGIN
           IF prefixeUtilisateur IS NULL THEN
             DBMS_OUTPUT.PUT_LINE('Veuillez utiliser un préfixe pris en charge');
           END IF;
-          SELECT loginUser FROM Utilisateur WHERE loginUser LIKE CONCAT(prefixeUtilisateur, '%');
-      END chercherMembre; */
+          EXECUTE IMMEDIATE 'SELECT loginUser FROM Utilisateur WHERE loginUser LIKE CONCAT('''||prefixeUtilisateur||',%';
+      END chercherMembre; 
 
 END PACKFASSEBOUC;
