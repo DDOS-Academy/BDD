@@ -14,7 +14,7 @@ CREATE TABLE Message(
    FOREIGN KEY(loginUtilisateur_1) REFERENCES Utilisateur(loginUtilisateur) ON DELETE CASCADE
 );
 
-CREATE TABLE être_ami(
+CREATE TABLE Etre_ami(
    loginUtilisateur VARCHAR(50),
    loginUtilisateur_1 VARCHAR(50),
    PRIMARY KEY(loginUtilisateur, loginUtilisateur_1),

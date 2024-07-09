@@ -28,7 +28,7 @@ PACKAGE BODY packfassebouc IS
   IS
     dejaAmi NUMBER(1);
   BEGIN
-    SELECT COUNT(*) INTO dejaAmi FROM être_ami WHERE loginUtilisateur = loginAmi AND loginUtilisateur_1 = utilisateurActuelle; -- Test si l'utilsateur n'est pas déjà amis avec la personne
+    SELECT COUNT(*) INTO dejaAmi FROM etre_ami WHERE loginUtilisateur = loginAmi AND loginUtilisateur_1 = utilisateurActuelle; -- Test si l'utilsateur n'est pas déjà amis avec la personne
     RETURN dejaAmi;
   END dejaAmi;
   
@@ -112,7 +112,7 @@ PACKAGE BODY packfassebouc IS
   END deconnexion;
   
 
-  PROCEDURE ajouterAmi(loginAmi IN être_ami.loginUtilisateur_1%TYPE)
+  PROCEDURE ajouterAmi(loginAmi IN etre_ami.loginUtilisateur_1%TYPE)
   IS
     reponse NUMBER(1);
   BEGIN
@@ -125,8 +125,8 @@ PACKAGE BODY packfassebouc IS
           ELSE 
           reponse := dejaAmi(loginAmi);
           IF reponse = 0 THEN
-            INSERT INTO ÊTRE_AMI VALUES(utilisateurActuelle, loginAmi); 
-            INSERT INTO ÊTRE_AMI VALUES(loginAmi, utilisateurActuelle);
+            INSERT INTO ETRE_AMI VALUES(utilisateurActuelle, loginAmi); 
+            INSERT INTO ETRE_AMI VALUES(loginAmi, utilisateurActuelle);
             dbms_output.put_line('Vous êtes ami avec ' || loginAmi);
           ELSE
             dbms_output.put_line('Vous êtes déjà amis avec ' || loginAmi);
@@ -138,7 +138,7 @@ PACKAGE BODY packfassebouc IS
     END IF;
   END ajouterAmi;
   
-  PROCEDURE supprimerAmi(loginAmi IN être_ami.loginUtilisateur_1%TYPE)
+  PROCEDURE supprimerAmi(loginAmi IN etre_ami.loginUtilisateur_1%TYPE)
   IS
     reponse NUMBER(1);
   BEGIN
@@ -147,12 +147,12 @@ PACKAGE BODY packfassebouc IS
       IF reponse = 0 THEN
         dbms_output.put_line(loginAmi || ' n"existe pas');
         ELSE IF loginAmi = utilisateurActuelle THEN
-          dbms_output.put_line('Vous ne pouvez pas être ami avec vous même');
+          dbms_output.put_line('Vous ne pouvez pas etre ami avec vous même');
           ELSE
           reponse := dejaAmi(loginAmi);
           IF reponse != 0 THEN
-            DELETE FROM ÊTRE_AMI WHERE loginUtilisateur = utilisateurActuelle AND loginUtilisateur_1 = loginAmi;
-            DELETE FROM ÊTRE_AMI WHERE loginUtilisateur = loginAmi AND loginUtilisateur_1 = utilisateurActuelle;
+            DELETE FROM ETRE_AMI WHERE loginUtilisateur = utilisateurActuelle AND loginUtilisateur_1 = loginAmi;
+            DELETE FROM ETRE_AMI WHERE loginUtilisateur = loginAmi AND loginUtilisateur_1 = utilisateurActuelle;
             dbms_output.put_line('Vous n"êtes plus ami avec ' || loginAmi);
           ELSE 
             dbms_output.put_line('Vous n"êtes pas amis avec ' || loginAmi);
@@ -186,7 +186,7 @@ PACKAGE BODY packfassebouc IS
     END IF;
   END afficherMur;
   
-  PROCEDURE ajouterMessageMur(loginAmi IN être_ami.loginUtilisateur_1%TYPE, message IN message.message%TYPE)
+  PROCEDURE ajouterMessageMur(loginAmi IN etre_ami.loginUtilisateur_1%TYPE, message IN message.message%TYPE)
   IS
     reponse NUMBER(3);
   BEGIN
@@ -241,7 +241,7 @@ PACKAGE BODY packfassebouc IS
   PROCEDURE afficherAmi(loginU IN utilisateur.loginUtilisateur%TYPE)
   IS
     reponse NUMBER(1);
-    CURSOR curseurAmiSelectionne IS SELECT loginUtilisateur_1 FROM être_ami WHERE loginUtilisateur = loginU;
+    CURSOR curseurAmiSelectionne IS SELECT loginUtilisateur_1 FROM etre_ami WHERE loginUtilisateur = loginU;
   BEGIN
     IF estConnecte = 1 THEN 
       reponse := loginExiste(loginU);
@@ -267,7 +267,7 @@ PACKAGE BODY packfassebouc IS
       IF reponse = 0 THEN
         dbms_output.put_line(loginU || ' n"existe pas');
       ELSE 
-        SELECT COUNT(*) INTO reponse FROM être_ami WHERE loginUtilisateur = loginU;
+        SELECT COUNT(*) INTO reponse FROM etre_ami WHERE loginUtilisateur = loginU;
         dbms_output.put_line(loginU || ' a ' || reponse || ' amis.');
       END IF;
     ELSE 

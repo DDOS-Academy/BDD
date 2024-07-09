@@ -8,13 +8,13 @@ PACKAGE packfassebouc IS
 
   PROCEDURE deconnexion;
 
-  PROCEDURE ajouterAmi(loginAmi IN être_ami.loginUtilisateur_1%TYPE);
+  PROCEDURE ajouterAmi(loginAmi IN etre_ami.loginUtilisateur_1%TYPE);
 
-  PROCEDURE supprimerAmi(loginAmi IN être_ami.loginUtilisateur_1%TYPE);
+  PROCEDURE supprimerAmi(loginAmi IN etre_ami.loginUtilisateur_1%TYPE);
 
   PROCEDURE afficherMur(loginU IN utilisateur.loginUtilisateur%TYPE);
 
-  PROCEDURE ajouterMessageMur(loginAmi IN être_ami.loginUtilisateur_1%TYPE, message IN message.message%TYPE);
+  PROCEDURE ajouterMessageMur(loginAmi IN etre_ami.loginUtilisateur_1%TYPE, message IN message.message%TYPE);
 
   PROCEDURE supprimerMessageMur(id_message IN message.id_message%TYPE);
 
