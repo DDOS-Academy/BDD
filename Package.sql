@@ -1,24 +1,28 @@
-create or replace 
-PACKAGE PACKFASSEBOUC IS
+CREATE OR REPLACE
+PACKAGE packfassebouc IS
+  PROCEDURE ajouterUtilisateur(loginU IN Utilisateur.loginUtilisateur%TYPE);
 
--- PROCEDURE publique
-PROCEDURE ajouterUtilisateur(idUtilisateur IN VARCHAR);
-PROCEDURE supprimerUtilisateur;
-PROCEDURE connexion(idUtilisateur IN VARCHAR);
-PROCEDURE deconnexion;
-PROCEDURE ajouterAmi(idAmi IN VARCHAR);
-PROCEDURE supprimerAmi(idAmi IN VARCHAR);
-PROCEDURE compterAmi (idUtilisateur IN VARCHAR);
-PROCEDURE afficherAmi(idUtilisateur IN VARCHAR);
-PROCEDURE afficherMur(idUtilisateur IN VARCHAR);
-PROCEDURE ajouterMessageMur(idAmi IN VARCHAR, message IN VARCHAR);
-PROCEDURE supprimerMessageMur(message_id IN VARCHAR);
-PROCEDURE repondreMessageMur(idMessage1 IN NUMBER, messageReponse IN VARCHAR, idUtilisateur IN VARCHAR);
-PROCEDURE chercherMembre(prefixeUtilisateur IN VARCHAR);
+  PROCEDURE supprimerUtilisateur;
 
+  PROCEDURE connexion(loginU IN utilisateur.loginUtilisateur%TYPE);
 
--- Varaible publique
-utilisateurConnecte varchar(20);
+  PROCEDURE deconnexion;
 
+  PROCEDURE ajouterAmi(loginAmi IN être_ami.loginUtilisateur_1%TYPE);
 
-END PACKFASSEBOUC;
+  PROCEDURE supprimerAmi(loginAmi IN être_ami.loginUtilisateur_1%TYPE);
+
+  PROCEDURE afficherMur(loginU IN utilisateur.loginUtilisateur%TYPE);
+
+  PROCEDURE ajouterMessageMur(loginAmi IN être_ami.loginUtilisateur_1%TYPE, message IN message.message%TYPE);
+
+  PROCEDURE supprimerMessageMur(id_message IN message.id_message%TYPE);
+
+  PROCEDURE repondreMessageMur(id_message IN message.id_message%TYPE, messageReponse IN repondre.messagereponse%TYPE);
+
+  PROCEDURE afficherAmi(loginU IN utilisateur.loginUtilisateur%TYPE);
+
+  PROCEDURE compterAmi(loginU IN utilisateur.loginUtilisateur%TYPE);
+
+  PROCEDURE chercherMembre(préfixeLoginMembre IN utilisateur.loginUtilisateur%TYPE);
+END packfassebouc;

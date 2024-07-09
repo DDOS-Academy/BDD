@@ -1,243 +1,291 @@
 create or replace 
-PACKAGE BODY PACKFASSEBOUC IS
- 
-/* Procédures privées */
-PROCEDURE deleteAllFriends
+PACKAGE BODY packfassebouc IS
+  estConnecte NUMBER(1) := 0; 
+  utilisateurActuelle VARCHAR2(50);
+  dernierMessage NUMBER(3) := 1;
+    
+  ------------------------------------------------
+  --FONCTIONS 
+  ------------------------------------------------
+  
+  FUNCTION loginExiste(loginU IN VARCHAR2) RETURN NUMBER 
   IS
+    existe NUMBER(1);
   BEGIN
-    EXECUTE IMMEDIATE 'DELETE FROM etre_ami WHERE loginUser='''||utilisateurConnecte||''' OR loginUser_1='''||utilisateurConnecte||'''';
-    dbms_output.put_line('Tout les amis de : '||utilisateurConnecte||' sont supprimés');
-END deleteAllFriends;
-      
-PROCEDURE deleteAllMessages --Procédure de suppression de tous les messages de l'utilisateur connecté
+    SELECT COUNT(*) INTO existe FROM Utilisateur WHERE loginUtilisateur = loginU; -- Test si le login ami existe
+    RETURN existe;
+  END loginExiste;
+  
+  FUNCTION messageExiste(messageASupprimer IN VARCHAR2) RETURN NUMBER
   IS
+    existe NUMBER(1);
   BEGIN
-    EXECUTE IMMEDIATE 'DELETE FROM message WHERE loginUser='''||utilisateurConnecte||''' OR loginUser_1='''||utilisateurConnecte||''''; --Suppression des messages envoyés et recus par l'utilisateur connecté
-    EXECUTE IMMEDIATE 'DELETE FROM repondre WHERE loginUser='''||utilisateurConnecte||''''; -- Suppression des message auxquels l'utilisateur a répondu
-    dbms_output.put_line('Tout les messages à destination et provenant de : '||utilisateurConnecte||' ont été supprimés');
-END deleteAllMessages;
-
-
-
-/* Procédures publiques */
-  PROCEDURE ajouterUtilisateur (idUtilisateur IN VARCHAR)--Procédure de d'ajout d'ajout d'un utilisateur
-    IS
-    BEGIN
-      IF idUtilisateur IS NULL THEN
-        dbms_output.put_line('Erreur login utilisateur'); -- Si le nom d'utilisateur n'est pas saisis 
-      ELSE
-        EXECUTE IMMEDIATE  'INSERT INTO utilisateur values ('''||idUtilisateur||''')'; -- Créer l'utilisateur 
-        dbms_output.put_line('Nouvel utilisateur : ' || idUtilisateur);
-      END IF;    
-      EXCEPTION
-        WHEN DUP_VAL_ON_INDEX THEN
-        dbms_output.put_line('Utilisateur déjà existant'); -- Exception si l'utilisateur existe déjà
+    SELECT COUNT(*) INTO existe FROM message WHERE id_message = messageASupprimer; 
+    RETURN existe;
+  END messageExiste;
+  
+  FUNCTION dejaAmi(loginAmi IN VARCHAR2) RETURN NUMBER 
+  IS
+    dejaAmi NUMBER(1);
+  BEGIN
+    SELECT COUNT(*) INTO dejaAmi FROM être_ami WHERE loginUtilisateur = loginAmi AND loginUtilisateur_1 = utilisateurActuelle; -- Test si l'utilsateur n'est pas déjà amis avec la personne
+    RETURN dejaAmi;
+  END dejaAmi;
+  
+  FUNCTION getPkFromMessageSeq RETURN NUMBER
+  IS
+    reponse NUMBER(1);
+  BEGIN
+    SELECT COUNT(message) INTO reponse FROM message WHERE id_message = dernierMessage;
+    IF reponse = 0 THEN 
+      RETURN dernierMessage;
+    ELSE 
+      SELECT COUNT(*) INTO reponse FROM message;
+      FOR i IN 0 .. reponse LOOP
+        SELECT COUNT(message) INTO reponse FROM message WHERE id_message = (dernierMessage + i);
+        IF reponse = 0 THEN
+          dernierMessage := dernierMessage + i;
+          RETURN dernierMessage;
+        END IF;
+      END LOOP;
+      dernierMessage := dernierMessage +1;
+      RETURN dernierMessage;
+    END IF;
+  END getPkFromMessageSeq;
+  
+  ------------------------------------------------
+  --PROCEDURE
+  ------------------------------------------------
+  
+  
+  PROCEDURE ajouterUtilisateur(loginU IN Utilisateur.loginUtilisateur%TYPE) 
+  IS
+    reponse NUMBER(1);
+  BEGIN
+    reponse := loginExiste(loginU); 
+    IF reponse = 0 THEN 
+      INSERT INTO Utilisateur VALUES(loginU);
+      dbms_output.put_line(loginU || ' a été ajouté.');
+    ELSE 
+      dbms_output.put_line(loginU || ' existe déjà.');
+    END IF;
   END ajouterUtilisateur;
   
-  PROCEDURE connexion (idUtilisateur IN VARCHAR) --Procédure de connexion à un utilisateur
-    IS
-      nbUser NUMBER(1); -- Vérification qu'il y a des utilisateurs d'enregistrés
-    BEGIN
-      IF idUtilisateur IS NULL THEN
-        dbms_output.put_line('Erreur login utilisateur'); -- Si le nom d'utilisateur n'est pas saisis 
-      ELSE
-        IF utilisateurConnecte IS NULL THEN
-          SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idUtilisateur;
-          IF nbUser <> 0 THEN -- Vérifier que le login correspond à un utilisateur existant 
-            utilisateurConnecte := idUtilisateur; -- Se connecter à l'utilisateur choisit
-            dbms_output.put_line('Utilisateur connecté : ' || utilisateurConnecte);
-          ELSE
-          dbms_output.put_line('L"utilisateur "' || idUtilisateur || '" n"existe pas' ); -- L'utilisateur n'existe pas
-          END IF;
-        ELSE
-          dbms_output.put_line('Utilisateur ' || utilisateurConnecte || ' déjà connecté'); -- Déjà connecté à l'utilisateur
-        END IF;       
-      END IF;
-  END connexion;
-  
-  PROCEDURE deconnexion  -- Procédure de deconnexion
-    IS
-    BEGIN
-      IF utilisateurConnecte IS NULL THEN
-        dbms_output.put_line('Aucun utilisateur de connecté'); -- Personne n'est connecté
-      ELSE
-        dbms_output.put_line('Utilisateur : ' || utilisateurConnecte || ' déconnecté'); -- Déconnecte l'utilisateur
-        utilisateurConnecte := NULL; -- Retour de la valeur de connexion à null
-      END IF;
-  END deconnexion;
-  
-  PROCEDURE supprimerUtilisateur --Procédure de suppression d'un utilisateur
-    IS
-    BEGIN
-      IF utilisateurConnecte IS NULL THEN
-        dbms_output.put_line('Aucun utilisateur de connecté'); -- Personne n'est connecté
-      ELSE
-        deleteAllFriends; --utilisation de la procédure de suppression des amis
-        deleteAllMessages;--utilisation de la procédure de suppression des messages
-        EXECUTE IMMEDIATE 'DELETE FROM utilisateur WHERE loginUser='''||utilisateurConnecte||''''; -- Suppression de l'utilisateur 
-        dbms_output.put_line('Utilisateur : ' ||utilisateurConnecte|| ' supprimé'); 
-        deconnexion; --utilisation de la procédure de déconnexion
-      END IF;
+
+  PROCEDURE supprimerUtilisateur
+  IS
+  BEGIN
+    IF estConnecte = 1 THEN 
+      DELETE FROM Utilisateur WHERE loginUtilisateur = utilisateurActuelle;
+      dbms_output.put_line(utilisateurActuelle || ' a été supprimé.');
+      estConnecte := 0;
+    ELSE 
+      dbms_output.put_line('Vous n"êtes pas connecté.');
+    END IF;    
   END supprimerUtilisateur;
 
-  PROCEDURE ajouterAmi(idAmi IN VARCHAR) --Procédure d'ajout d'un amis 
-    IS
-    nbUser NUMBER(1);
-    BEGIN 
-      IF utilisateurConnecte IS NULL THEN -- Personne n'est connecté
-        dbms_output.put_line('Aucun utilisateur de connecté'); 
-      ELSE
-        IF idAmi IS NULL OR idAmi = utilisateurConnecte THEN
-          dbms_output.put_line('Veuillez entrer un nom d utilisateur correct'); -- L'utilisateur n'existe pas ou le lien n'est pas faisable 
-        ELSE 
-          SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idAmi;
-          IF nbUser <> 0 THEN -- Vérifier que l'amis existe
-            EXECUTE IMMEDIATE  'INSERT INTO etre_ami values ('''||utilisateurConnecte||''','''||idAmi||''')'; -- Ajout de l'ami 
-            dbms_output.put_line('Vous êtes désormais ami avec '||idAmi|| ' !');
-          END IF;
-         END IF;
-        END IF;
-    END ajouterAmi; 
-    
-    PROCEDURE supprimerAmi(idAmi IN VARCHAR) -- Procédure de suppression de lien d'amitié
-      IS
-      nbUser NUMBER(1);
-      BEGIN
-        IF utilisateurConnecte IS NULL THEN -- Personne n'est connecté
-          dbms_output.put_line('Aucun utilisateur de connecté');
-        ELSE
-          IF idAmi IS NULL THEN -- L'utilisateur n'existe pas
-            dbms_output.put_line('Veuillez entrer un nom d utilisateur correcte');
-          ELSE
-          SELECT COUNT(idAmi) INTO nbUser FROM etre_ami WHERE loginUser = utilisateurConnecte AND loginUser_1 = idAmi;
-            IF nbUser <> 0 THEN -- Vérifier que l'utilisateur a des amis
-              EXECUTE IMMEDIATE  'DELETE FROM etre_ami WHERE loginUser='''||utilisateurConnecte||''' AND loginUser_1='''||idAmi||''''; -- Suppression des liens d'amitié
-              dbms_output.put_line('Vous n''êtes désormais plus ami avec '||idAmi|| ' !');
-            END IF;
-          END IF;
-        END IF;
-      END supprimerAmi;
-      
-      
-      PROCEDURE afficherMur(idUtilisateur IN VARCHAR) --Procédure d'affichage du mur
-        IS
-        nbUser NUMBER(1); -- Variable locale
-        nbMessage NUMBER(1); -- Variable locale
-        BEGIN
-          IF idUtilisateur IS NULL THEN -- Personne n'est connecté
-            dbms_output.put_line('Veuillez entrer un nom d utilisateur correct');
-          END IF;
-            SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idUtilisateur; -- Vérification que l'utilisateur existe
-            SELECT COUNT(idMessage) INTO nbMessage FROM message WHERE loginUser_1 = idUtilisateur; -- Vérification que le mur contient des messages
-              IF nbUser <> 0 AND nbMessage <> 0 THEN -- Si le nombre d'utilisateur et de message est différent de 0, 
-                EXECUTE IMMEDIATE 'SELECT * FROM message WHERE loginUser_1='''||idUtilisateur||''' ORDER BY dateMessage'; -- Séléction des messages reçus par l'utilisateur et affichage de ceux ci
-              ELSE 
-                dbms_output.put_line('Aucun message reçu par '||idUtilisateur||'');
-              END IF;
-      END afficherMur;
+
+  PROCEDURE connexion(loginU IN utilisateur.loginUtilisateur%TYPE)
+  IS
+    reponse NUMBER(1);
+  BEGIN
+    IF estConnecte = 1 THEN
+      dbms_output.put_line('Veuillez vous déconnecter de ' || utilisateurActuelle);
+    ELSE 
+      reponse := loginExiste(loginU);
+      IF reponse = 1 THEN 
+        utilisateurActuelle := loginU;
+        estConnecte := 1;
+        dbms_output.put_line('Bienvenue ' || utilisateurActuelle || ' vous êtes connecté');
+      ELSE 
+        dbms_output.put_line('Cet utilisteur n"existe pas.');
+      END IF;
+    END IF;
+  END connexion;
 
 
-       PROCEDURE ajouterMessageMur(idAmi IN VARCHAR, message IN VARCHAR)
-        IS
-        v_idMessage INT;
-        nbUser NUMBER(1);
-        BEGIN
-        SELECT seq_message_id.NEXTVAL INTO v_idMessage FROM DUAL;
-          IF idAmi IS NULL OR message IS NULL THEN 
-            dbms_output.put_line('Veuillez remplir tout les champs');
-          END IF;
-          SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idAmi;
-          IF nbUser <> 0 THEN
-            EXECUTE IMMEDIATE 'INSERT INTO Message VALUES('''||v_idMessage||''', '''||SYSDATE||''', '''||message||''', '''||utilisateurConnecte||''', '''||idAmi||''')';
-            DBMS_OUTPUT.PUT_LINE('Le message a été ajouté avec succès.');
+  PROCEDURE deconnexion
+  IS
+  BEGIN
+    estConnecte := 0;
+    dbms_output.put_line('Vous êtes déconnecté');
+  END deconnexion;
+  
+
+  PROCEDURE ajouterAmi(loginAmi IN être_ami.loginUtilisateur_1%TYPE)
+  IS
+    reponse NUMBER(1);
+  BEGIN
+    IF estConnecte = 1 THEN 
+      reponse := loginExiste(loginAmi);
+      IF reponse = 0 THEN 
+        dbms_output.put_line(loginAmi || ' n"existe pas');
+      ELSE IF loginAmi = utilisateurActuelle THEN
+          dbms_output.put_line('Vous ne pouvez pas être ami avec vous même');
           ELSE 
-            dbms_output.put_line('Veuillez entrer un nom d utilisateur correct');
-          END IF;
-        v_idMessage := message_id.nextval;
-      END ajouterMessageMur;
-
-
-      PROCEDURE supprimerMessageMur(message_id IN VARCHAR)
-      IS
-        nbMessage NUMBER := 0;
-        nbUser NUMBER := 0;
-      BEGIN
-        IF utilisateurConnecte IS NULL THEN -- Personne n'est connecté
-          dbms_output.put_line('Veuillez vous connecter');
-        END IF;
-        SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = utilisateurConnecte; -- Vérification que l'utilisateur existe
-        SELECT COUNT(message_id) INTO nbMessage FROM message WHERE loginUser = utilisateurConnecte; -- Vérification que le mur contient des messages
-        SELECT COUNT(contenu) INTO nbMessage FROM message WHERE idmessage = message_id;
-          IF nbMessage <> 0 THEN
-            EXECUTE IMMEDIATE 'DELETE FROM Mur WHERE idmessage = message_id AND loginUser='||utilisateurConnecte||'';
-            dbms_output.put_line('Votre message a été supprimé du mur.');
+          reponse := dejaAmi(loginAmi);
+          IF reponse = 0 THEN
+            INSERT INTO ÊTRE_AMI VALUES(utilisateurActuelle, loginAmi); 
+            INSERT INTO ÊTRE_AMI VALUES(loginAmi, utilisateurActuelle);
+            dbms_output.put_line('Vous êtes ami avec ' || loginAmi);
           ELSE
-            dbms_output.put_line('Aucun message correspondant trouvé dans le mur.');
+            dbms_output.put_line('Vous êtes déjà amis avec ' || loginAmi);
           END IF;
-      END supprimerMessageMur;
-
-      PROCEDURE afficherAmi(idUtilisateur IN VARCHAR)
-      IS
-      nbUser NUMBER(1);
-      BEGIN
-      IF idUtilisateur IS NULL THEN
-        dbms_output.put_line('Entrez un utilisateur');
-      END IF;
-
-        SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idUtilisateur;
-      IF nbUser <> 0 THEN
-        EXECUTE IMMEDIATE 'SELECT * FROM etre_ami WHERE loginUser = '''||idUtilisateur||''' OR loginUser_1 = '''||idUtilisateur||'''';
-      ELSE  
-        dbms_output.put_line('Veuillez entrer un utilisateur valide');
-      END IF;
-      END afficherAmi;
-
-      PROCEDURE compterAmi(idUtilisateur IN VARCHAR)
-      IS
-      nbUser NUMBER(1);
-      BEGIN
-      IF idUtilisateur IS NULL THEN
-        dbms_output.put_line('Entrez un utilisateur');
-      END IF;
-        SELECT COUNT(loginUser) INTO nbUser FROM utilisateur WHERE loginUser = idUtilisateur;
-        IF nbUser <> 0 THEN
-          SELECT COUNT (loginUser) INTO nbUser FROM etre_ami WHERE loginUser = idUtilisateur OR loginUser_1 = idUtilisateur;
-          dbms_output.put_line('Vous avez '||nbUser||' ami(s)');
-        ELSE  
-          dbms_output.put_line('Veuillez entrer un utilisateur valide');
         END IF;
-      END compterAmi;
-
-      PROCEDURE repondreMessageMur (idMessage1 IN NUMBER, messageReponse IN VARCHAR, idUtilisateur IN VARCHAR)
-      IS
-      a_idMessage INT;
-      nbMessage NUMBER(1);
-      IdUser VARCHAR(20);
-      nbUser NUMBER(1);
-      BEGIN
-      IF idUtilisateur IS NULL THEN
-        dbms_output.put_line('Entrez un utilisateur');
       END IF;
-
-      SELECT COUNT(idMessage) INTO nbMessage FROM message WHERE idMessage = idMessage1;
-      SELECT loginUser INTO IdUser FROM message WHERE idMessage = idMessage1;
-        IF nbMessage <> 0 THEN
-          IF messageReponse IS NULL THEN 
-            dbms_output.put_line('Veuillez remplir tout les champs');
+    ELSE 
+      dbms_output.put_line('Vous n"êtes pas connecté.');
+    END IF;
+  END ajouterAmi;
+  
+  PROCEDURE supprimerAmi(loginAmi IN être_ami.loginUtilisateur_1%TYPE)
+  IS
+    reponse NUMBER(1);
+  BEGIN
+    IF estConnecte = 1 THEN 
+      reponse := loginExiste(loginAmi); 
+      IF reponse = 0 THEN
+        dbms_output.put_line(loginAmi || ' n"existe pas');
+        ELSE IF loginAmi = utilisateurActuelle THEN
+          dbms_output.put_line('Vous ne pouvez pas être ami avec vous même');
+          ELSE
+          reponse := dejaAmi(loginAmi);
+          IF reponse != 0 THEN
+            DELETE FROM ÊTRE_AMI WHERE loginUtilisateur = utilisateurActuelle AND loginUtilisateur_1 = loginAmi;
+            DELETE FROM ÊTRE_AMI WHERE loginUtilisateur = loginAmi AND loginUtilisateur_1 = utilisateurActuelle;
+            dbms_output.put_line('Vous n"êtes plus ami avec ' || loginAmi);
+          ELSE 
+            dbms_output.put_line('Vous n"êtes pas amis avec ' || loginAmi);
           END IF;
-            INSERT INTO repondre(loginUser, idMessage, messageReponse, dateMessage)
-            VALUES (IdUser, idMessage1, messageReponse, SYSDATE);
-            DBMS_OUTPUT.PUT_LINE('Le message a été ajouté avec succès.');
         END IF;
-      END repondreMessageMur;
+      END IF;
+    ELSE 
+      dbms_output.put_line('Vous n"êtes pas connecté.');
+    END IF;
+  END supprimerAmi;
 
-     PROCEDURE chercherMembre(prefixeUtilisateur IN VARCHAR)
-     IS
-      BEGIN
-          IF prefixeUtilisateur IS NULL THEN
-            DBMS_OUTPUT.PUT_LINE('Veuillez utiliser un préfixe pris en charge');
+
+  PROCEDURE afficherMur(loginU IN utilisateur.loginUtilisateur%TYPE)
+  IS
+    CURSOR curseurafficherMur IS SELECT id_message, message FROM message WHERE loginUtilisateur = utilisateurActuelle AND loginUtilisateur_1 = loginU;
+    reponse NUMBER(1);
+  BEGIN
+    IF estConnecte = 1 THEN
+      reponse := loginExiste(loginU);
+      IF reponse = 1 THEN
+        dbms_output.put_line('Messages reçu de ' || loginU || ' :');
+        FOR i IN curseurafficherMur LOOP
+          dbms_output.put('N°' || i.id_message || ' ');
+          dbms_output.put_line(i.message);
+        END LOOP;
+      ELSE 
+        dbms_output.put_line('Vous n"êtes pas amis avec ' || loginU);
+      END IF;
+    ELSE 
+      dbms_output.put_line('Vous n"êtes pas connecté.');
+    END IF;
+  END afficherMur;
+  
+  PROCEDURE ajouterMessageMur(loginAmi IN être_ami.loginUtilisateur_1%TYPE, message IN message.message%TYPE)
+  IS
+    reponse NUMBER(3);
+  BEGIN
+    IF estConnecte = 1 THEN
+      reponse := loginExiste(loginAmi); 
+      IF reponse = 1 THEN
+        IF loginAmi = utilisateurActuelle THEN
+          reponse := getpkfrommessageseq();
+          INSERT INTO message VALUES(reponse, sysdate, message, utilisateurActuelle, loginAmi);
+          dbms_output.put_line('Vous avez ajouté "' || message || '" sur votre mur');
+        ELSE 
+          reponse := dejaAmi(loginAmi);
+          IF reponse = 1 THEN
+            reponse := getpkfrommessageseq();
+            INSERT INTO message VALUES(reponse, sysdate, message, utilisateurActuelle, loginAmi);
+            dbms_output.put_line('Vous avez ajouté "' || message || '" sur le mur de ' || loginAmi);
+          ELSE 
+            dbms_output.put_line('Vous n"êtes pas amis avec ' || loginAmi);
           END IF;
-          EXECUTE IMMEDIATE 'SELECT loginUser FROM Utilisateur WHERE loginUser LIKE CONCAT('''||prefixeUtilisateur||',%';
-      END chercherMembre; 
+        END IF;
+      ELSE 
+        dbms_output.put_line('Cet utilisteur n"existe pas.');
+      END IF;
+    ELSE 
+      dbms_output.put_line('Vous n"êtes pas connecté.');
+    END IF;
+  END ajouterMessageMur;
+  
 
-END PACKFASSEBOUC;
+  PROCEDURE supprimerMessageMur(idMessageASupprimer IN message.id_message%TYPE)
+  IS
+    reponse NUMBER(1);
+  BEGIN
+    reponse := messageExiste(idMessageASupprimer);
+    IF reponse = 1 THEN
+      DELETE FROM message WHERE id_message = idMessageASupprimer;
+      dernierMessage := idMessageASupprimer;
+      dbms_output.put_line('Message supprimé');
+    ELSE 
+      dbms_output.put_line('Ce message n"existe pas');
+    END IF;
+  END supprimerMessageMur;
+  
+
+  PROCEDURE repondreMessageMur(id_message IN message.id_message%TYPE, messageReponse IN repondre.messagereponse%TYPE)
+  IS
+  BEGIN
+    dbms_output.put_line('TODO');
+  END repondreMessageMur;
+  
+
+  PROCEDURE afficherAmi(loginU IN utilisateur.loginUtilisateur%TYPE)
+  IS
+    reponse NUMBER(1);
+    CURSOR curseurAmiSelectionne IS SELECT loginUtilisateur_1 FROM être_ami WHERE loginUtilisateur = loginU;
+  BEGIN
+    IF estConnecte = 1 THEN 
+      reponse := loginExiste(loginU);
+      IF reponse = 1 THEN
+        FOR i IN curseurAmiSelectionne LOOP
+          dbms_output.put_line(i.loginUtilisateur_1);
+        END LOOP;
+      ELSE 
+        dbms_output.put_line('Vous n"êtes pas amis avec ' || loginU);
+      END IF;
+    ELSE 
+      dbms_output.put_line('Vous n"êtes pas connecté.');
+    END IF;
+  END afficherAmi;
+  
+
+  PROCEDURE compterAmi(loginU IN utilisateur.loginUtilisateur%TYPE)
+  IS
+    reponse NUMBER(1);
+  BEGIN
+    IF estConnecte = 1 THEN 
+      reponse := loginExiste(loginU);
+      IF reponse = 0 THEN
+        dbms_output.put_line(loginU || ' n"existe pas');
+      ELSE 
+        SELECT COUNT(*) INTO reponse FROM être_ami WHERE loginUtilisateur = loginU;
+        dbms_output.put_line(loginU || ' a ' || reponse || ' amis.');
+      END IF;
+    ELSE 
+      dbms_output.put_line('Vous n"êtes pas connecté.');
+    END IF;
+  END compterAmi;
+  
+
+  PROCEDURE chercherMembre(préfixeLoginMembre IN utilisateur.loginUtilisateur%TYPE)
+  IS
+    CURSOR curseurChercherMembre IS SELECT loginUtilisateur FROM utilisateur WHERE loginUtilisateur LIKE préfixeLoginMembre || '%';
+  BEGIN
+    IF estConnecte = 1 THEN 
+      FOR i IN curseurChercherMembre LOOP
+        dbms_output.put_line(i.loginUtilisateur);
+      END LOOP;
+    ELSE 
+      dbms_output.put_line('Vous n"êtes pas connecté.');
+    END IF;
+  END chercherMembre; 
+END packfassebouc;
